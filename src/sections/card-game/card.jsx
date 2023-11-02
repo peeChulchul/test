@@ -1,35 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import styles from "./card.module.css";
+import { useThrottle } from "util/useTrhottle";
+export default function Card({ bgColor, setSelect, foundColors }) {
+  const isFound = foundColors.includes(bgColor);
 
-export default function Card({ bgColor }) {
+  const onClickCard = useThrottle((e) => {
+    const dom = e.currentTarget;
+    dom.style.transform = "rotateY(360deg)";
+    dom.style.cursor = "default";
+    setSelect((prev) => {
+      if (prev.prevTarget.dom === dom) {
+        return prev;
+      }
+      if (prev.prevTarget.dom === null) {
+        return { prevTarget: { bgColor, dom }, currentTarget: { ...prev.currentTarget } };
+      }
+
+      return { prevTarget: { ...prev.prevTarget }, currentTarget: { bgColor, dom } };
+    });
+  }, 1000);
+
   return (
     <div
-      onClick={(e) => console.log((e.currentTarget.style.transform = ""))}
-      style={{
-        width: "100%",
-        height: "100px",
-        position: "relative",
-        transformStyle: "preserve-3d",
-        transform: "rotateY(180deg)",
-        transition: "all 0.5s linear"
-      }}
+      style={{ transform: `${isFound ? "rotateY(360deg)" : "rotateY(180deg)"}` }}
+      onClick={isFound ? null : onClickCard}
+      id={bgColor}
+      className={`${styles.card}  `}
     >
       <div
+        className={`${styles.card__inner} ${styles.card__back}`}
         style={{
-          position: "absolute",
           backgroundColor: "black",
-          height: "100%",
-          width: "100%",
-          backfaceVisibility: "hidden",
           transform: "rotateY(180deg)"
         }}
       ></div>
       <div
+        className={`${styles.card__inner} `}
         style={{
-          position: "absolute",
-          backgroundColor: bgColor,
-          height: "100%",
-          width: "100%",
-          backfaceVisibility: "hidden"
+          backgroundColor: bgColor
         }}
       ></div>
     </div>
